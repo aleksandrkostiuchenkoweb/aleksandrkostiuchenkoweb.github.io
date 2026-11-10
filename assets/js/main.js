@@ -18,6 +18,22 @@
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 
+  /* ---- страховка от «залипшего» вьюпорта ----
+     Chrome на Windows после максимизации окна или смены масштаба экрана
+     иногда продолжает рисовать страницу по старому размеру окна, а
+     viewport-единицы (svh) при этом «замирают». Пересчитываем высоту
+     hero из JS на каждом resize — CSS min-height остаётся фолбэком без JS. */
+  function heroFit() {
+    if (!hero) return;
+    hero.style.minHeight = Math.max(560, Math.round(window.innerHeight * 0.92)) + "px";
+  }
+  var heroFitRaf = 0;
+  window.addEventListener("resize", function () {
+    cancelAnimationFrame(heroFitRaf);
+    heroFitRaf = requestAnimationFrame(heroFit);
+  }, { passive: true });
+  heroFit();
+
   /* ---- собственный скролл-спай: подсветка активного пункта меню ----
      Проще и стабильнее при плавном скролле, чем scroll-spy Bootstrap. */
   var navLinks = Array.prototype.slice.call(nav.querySelectorAll('.nav-link[href^="#"]'));
